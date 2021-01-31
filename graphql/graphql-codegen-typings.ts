@@ -25,6 +25,24 @@ export type Scalars = {
 
 
 
+export enum SocialType {
+  Github = 'GITHUB',
+  Facebook = 'FACEBOOK',
+  Twitter = 'TWITTER',
+  Google = 'GOOGLE',
+  Email = 'EMAIL'
+}
+
+export type Account = {
+  __typename?: 'Account';
+  id: Scalars['ID'];
+  /** User's e-mail address. */
+  email?: Maybe<Scalars['EmailAddress']>;
+  socialType: SocialType;
+  user: User;
+  password?: Maybe<Scalars['String']>;
+};
+
 export type User = {
   __typename?: 'User';
   /** User ID. */
@@ -33,14 +51,13 @@ export type User = {
   firstName: Scalars['String'];
   /** User's last name. */
   lastName: Scalars['String'];
-  /** User's e-mail address. */
-  email?: Maybe<Scalars['EmailAddress']>;
   /** Posts published by user. */
   posts?: Maybe<Array<Maybe<Post>>>;
   /** Users that this user is following. */
   following?: Maybe<Array<Maybe<User>>>;
   /** Users that this user is followed by. */
   followers?: Maybe<Array<Maybe<User>>>;
+  accounts?: Maybe<Array<Maybe<Account>>>;
 };
 
 export type Post = {
@@ -63,11 +80,24 @@ export type Query = {
   __typename?: 'Query';
   /** Get post by ID. */
   post?: Maybe<Post>;
+  user?: Maybe<User>;
+  signIn?: Maybe<User>;
 };
 
 
 export type QueryPostArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryUserArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QuerySignInArgs = {
+  email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 /** Publish post input. */
@@ -76,6 +106,14 @@ export type PublishPostInput = {
   title: Scalars['String'];
   /** Post content. */
   content: Scalars['String'];
+};
+
+export type SignUpInput = {
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  email: Scalars['EmailAddress'];
+  password?: Maybe<Scalars['String']>;
+  socialType: SocialType;
 };
 
 export type Mutation = {
@@ -97,6 +135,7 @@ export type Mutation = {
    * Returns the updated number of likes received.
    */
   likePost: Scalars['UnsignedInt'];
+  signUp?: Maybe<User>;
 };
 
 
@@ -119,18 +158,31 @@ export type MutationLikePostArgs = {
   postId: Scalars['ID'];
 };
 
+
+export type MutationSignUpArgs = {
+  input: SignUpInput;
+};
+
 export type AdditionalEntityFields = {
   path?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
 };
 
 import { ObjectID } from 'mongodb';
+export type AccountDbObject = {
+  _id: ObjectID,
+  email?: string,
+  socialType: string,
+  user: UserDbObject['_id'],
+  password?: Maybe<string>,
+};
+
 export type UserDbObject = {
   _id: ObjectID,
   firstName: string,
   lastName: string,
-  email?: string,
   following?: Maybe<Array<Maybe<UserDbObject['_id']>>>,
+  accounts?: Maybe<Array<Maybe<AccountDbObject['_id']>>>,
 };
 
 export type PostDbObject = {
