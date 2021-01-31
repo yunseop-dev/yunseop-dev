@@ -9,6 +9,7 @@ import {
   Post,
   PostDbObject,
   PublishPostInput,
+  SignUpInput,
   User,
   UserDbObject,
 } from './graphql-codegen-typings';
@@ -40,6 +41,32 @@ export const resolvers = {
 
       return result.ops[0] as PostDbObject;
     },
+    signUp: async (obj, { input }: { input: SignUpInput }): Promise<UserDbObject> => {
+      console.log(obj);
+      const user = await mongoDbProvider.usersCollection.insertOne({
+        firstName: input.firstName,
+        lastName: input.lastName,
+        accounts: []
+      });
+      console.log("user");
+      const account = await mongoDbProvider.accountsCollection.insertOne({
+        email: input.email,
+        password: input.password,
+        socialType: input.socialType,
+        user: user.insertedId
+      });
+      console.log("account");
+      user.ops[0].accounts.push(account.insertedId);
+
+      await mongoDbProvider.usersCollection.updateOne({
+        _id: user.insertedId,
+      }, {
+        $set: {
+          accounts: [account.insertedId]
+        }
+      })
+      return user.ops[0];
+    }
   },
   Post: {
     id: (obj: Post | PostDbObject): string =>
