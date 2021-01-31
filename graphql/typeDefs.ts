@@ -17,8 +17,13 @@ enum SocialType {
 
 type Account @entity {
   id: ID! @id
-  socialType: SocialType!
-  user: User!
+  """
+  User's e-mail address.
+  """
+  email: EmailAddress @column(overrideType: "string")
+  socialType: SocialType! @column
+  user: User! @link
+  password: String @column
 }
 
 type User @entity {
@@ -38,11 +43,6 @@ type User @entity {
   lastName: String! @column
 
   """
-  User's e-mail address.
-  """
-  email: EmailAddress @column(overrideType: "string")
-
-  """
   Posts published by user.
   """
   posts: [Post]
@@ -57,7 +57,7 @@ type User @entity {
   """
   followers: [User]
 
-  accounts: [Account]
+  accounts: [Account] @link
 }
 
 type Post @entity {
@@ -120,7 +120,8 @@ input SignUpInput {
   firstName: String!
   lastName: String!
   email: EmailAddress!
-  password: String!
+  password: String
+  socialType: SocialType!
 }
 
 type Mutation {

@@ -1,6 +1,7 @@
 import { Collection, Db, MongoClient, ObjectID } from 'mongodb';
 
 import environment from './environment';
+import { AccountDbObject, PostDbObject, SocialType, UserDbObject } from './graphql-codegen-typings';
 
 export class MongoDbProvider {
     private database?: Db;
@@ -15,7 +16,7 @@ export class MongoDbProvider {
         });
     }
 
-    get postsCollection (): Collection {
+    get postsCollection (): Collection<PostDbObject> {
         const postsCollection = this.getCollection('posts');
 
         if (!postsCollection) {
@@ -25,7 +26,7 @@ export class MongoDbProvider {
         return postsCollection;
     }
 
-    get usersCollection (): Collection {
+    get usersCollection (): Collection<UserDbObject> {
         const usersCollection = this.getCollection('users');
 
         if (!usersCollection) {
@@ -33,6 +34,16 @@ export class MongoDbProvider {
         }
 
         return usersCollection;
+    }
+
+    get accountsCollection (): Collection<AccountDbObject> {
+        const accountsCollection = this.getCollection('accounts');
+
+        if (!accountsCollection) {
+            throw new Error('Accounts collection is undefined');
+        }
+
+        return accountsCollection;
     }
 
     /**
@@ -74,23 +85,46 @@ export const mongoDbProvider = new MongoDbProvider(environment.mongoDb.url);
  * TODO: Remove in Production.
  */
 export async function addMockUsersAsync (): Promise<void> {
-    const usersCount = await mongoDbProvider.usersCollection.countDocuments();
-    if (usersCount === 0) {
-        await mongoDbProvider.usersCollection.insertMany([
-            {
-                _id: new ObjectID('0123456789abcdef01234567'),
-                firstName: 'Test',
-                lastName: 'User 1',
-                email: 'test.user1@test.com',
-            },
-            {
-                _id: new ObjectID('fedcba987654321098765432'),
-                firstName: 'Test',
-                lastName: 'User 2',
-                email: 'test.user2@test.com',
-                following: [new ObjectID('0123456789abcdef01234567')],
-            },
-        ]);
-        console.log("🐛 mock users added.");
+    try {
+
+        const accountsCount = await mongoDbProvider.accountsCollection.countDocuments();
+        if (accountsCount === 0) {
+            await mongoDbProvider.usersCollection.insertMany([
+                {
+                    _id: new ObjectID('4567890123abcdef45670123'),
+                    firstName: 'Test',
+                    lastName: 'User 1',
+                    following: [new ObjectID('fedcba987654321098765432')],
+                    accounts: [new ObjectID('0123456789abcdef01234567')]
+                },
+                {
+                    _id: new ObjectID('fedcba987654321098765432'),
+                    firstName: 'Test',
+                    lastName: 'User 2',
+                    following: [new ObjectID('4567890123abcdef45670123')],
+                    accounts: [new ObjectID('abc0123456789def01234567')]
+                }
+            ])
+            console.log("🐛");
+            await mongoDbProvider.accountsCollection.insertMany([
+                {
+                    _id: new ObjectID('0123456789abcdef01234567'),
+                    email: 'test.user1@test.com',
+                    socialType: SocialType.Email,
+                    password: "1234",
+                    user: new ObjectID('4567890123abcdef45670123')
+                },
+                {
+                    _id: new ObjectID('abc0123456789def01234567'),
+                    email: 'test.user2@test.com',
+                    socialType: SocialType.Email,
+                    password: "1234",
+                    user: new ObjectID('fedcba987654321098765432')
+                },
+            ]);
+            console.log("🐛  mock users added.");
+        }
+    } catch (error) {
+        console.log("🐛", error.message);
     }
 }

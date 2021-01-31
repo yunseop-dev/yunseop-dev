@@ -49,8 +49,8 @@ export const resolvers = {
     author: async (obj: Post | PostDbObject): Promise<User | UserDbObject> =>
       obj.author instanceof ObjectID
         ? (mongoDbProvider.usersCollection.findOne({
-            _id: obj.author,
-          }) as Promise<UserDbObject>)
+          _id: obj.author,
+        }) as Promise<UserDbObject>)
         : obj.author,
   },
   User: {
@@ -58,7 +58,7 @@ export const resolvers = {
       (obj as UserDbObject)._id
         ? (obj as UserDbObject)._id.toString()
         : (obj as User).id,
-    posts: (obj: User | UserDbObject): Promise<Post[]> =>
+    posts: (obj: User | UserDbObject): Promise<Post | PostDbObject[]> =>
       mongoDbProvider.postsCollection
         .find({
           author: (obj as User).id
