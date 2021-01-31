@@ -7,6 +7,20 @@ scalar DateTime
 scalar EmailAddress
 scalar UnsignedInt
 
+enum SocialType {
+  GITHUB
+  FACEBOOK
+  TWITTER
+  GOOGLE
+  EMAIL
+}
+
+type Account @entity {
+  id: ID! @id
+  socialType: SocialType!
+  user: User!
+}
+
 type User @entity {
   """
   User ID.
@@ -42,6 +56,8 @@ type User @entity {
   Users that this user is followed by.
   """
   followers: [User]
+
+  accounts: [Account]
 }
 
 type Post @entity {
@@ -82,6 +98,7 @@ type Query {
   """
   post(id: ID!): Post
   user(id: ID!): User
+  signIn(email: String!, password: String!): User
 }
 
 """
@@ -97,6 +114,13 @@ input PublishPostInput {
   Post content.
   """
   content: String!
+}
+
+input SignUpInput {
+  firstName: String!
+  lastName: String!
+  email: EmailAddress!
+  password: String!
 }
 
 type Mutation {
@@ -137,6 +161,8 @@ type Mutation {
     """
     postId: ID!
   ): UnsignedInt!
+
+  signUp(input: SignUpInput!): User
 }
 `;
 
