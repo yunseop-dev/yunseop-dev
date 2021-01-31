@@ -1,0 +1,7 @@
+overwrite: true
+schema: ./graphql/**/typeDefs.ts
+generates:
+  ./graphql/graphql-codegen-typings.d.ts:
+    plugins:
+      - typescript
+      - typescript-mongodb
