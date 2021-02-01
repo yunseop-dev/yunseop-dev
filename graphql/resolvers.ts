@@ -6,6 +6,7 @@ import {
 import { ObjectID } from 'mongodb';
 
 import {
+  AccountDbObject,
   Post,
   PostDbObject,
   PublishPostInput,
@@ -22,10 +23,9 @@ export const resolvers = {
   EmailAddress: EmailAddressResolver,
   UnsignedInt: UnsignedIntResolver,
   Query: {
-    user: (obj: any, { id }: { id: string }): Promise<UserDbObject | null> =>
-      mongoDbProvider.usersCollection.findOne({ _id: new ObjectID(id) }),
-    post: (obj: any, { id }: { id: string }): Promise<PostDbObject | null> =>
-      mongoDbProvider.postsCollection.findOne({ _id: new ObjectID(id) }),
+    user: (obj: any, { id }: { id: string }): Promise<UserDbObject | null> => mongoDbProvider.usersCollection.findOne({ _id: new ObjectID(id) }),
+    post: (obj: any, { id }: { id: string }): Promise<PostDbObject | null> => mongoDbProvider.postsCollection.findOne({ _id: new ObjectID(id) }),
+    account: (obj: any, { id }: { id: string }): Promise<AccountDbObject | null> => mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(id) }),
   },
   Mutation: {
     publishPost: async (
@@ -42,20 +42,17 @@ export const resolvers = {
       return result.ops[0] as PostDbObject;
     },
     signUp: async (obj, { input }: { input: SignUpInput }): Promise<UserDbObject> => {
-      console.log(obj);
       const user = await mongoDbProvider.usersCollection.insertOne({
         firstName: input.firstName,
         lastName: input.lastName,
         accounts: []
       });
-      console.log("user");
       const account = await mongoDbProvider.accountsCollection.insertOne({
         email: input.email,
         password: input.password,
         socialType: input.socialType,
         user: user.insertedId
       });
-      console.log("account");
       user.ops[0].accounts.push(account.insertedId);
 
       await mongoDbProvider.usersCollection.updateOne({
@@ -64,7 +61,7 @@ export const resolvers = {
         $set: {
           accounts: [account.insertedId]
         }
-      })
+      });
       return user.ops[0];
     }
   },
@@ -93,5 +90,15 @@ export const resolvers = {
             : (obj as UserDbObject)._id,
         })
         .toArray(),
+    accounts: (obj: User | UserDbObject): Promise<AccountDbObject[]> => mongoDbProvider.accountsCollection.find({
+      user: (obj as User).id
+        ? new ObjectID((obj as User).id)
+        : (obj as UserDbObject)._id,
+    }).toArray(),
   },
+  Account: {
+    id: (obj: ObjectID | AccountDbObject): string => {
+      return obj instanceof ObjectID ? obj.toString() : (obj as AccountDbObject)._id.toString();
+    }
+  }
 };
