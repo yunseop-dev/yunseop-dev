@@ -81,7 +81,7 @@ export type Query = {
   /** Get post by ID. */
   post?: Maybe<Post>;
   user?: Maybe<User>;
-  signIn?: Maybe<User>;
+  account?: Maybe<Account>;
 };
 
 
@@ -95,9 +95,8 @@ export type QueryUserArgs = {
 };
 
 
-export type QuerySignInArgs = {
-  email: Scalars['String'];
-  password: Scalars['String'];
+export type QueryAccountArgs = {
+  id: Scalars['ID'];
 };
 
 /** Publish post input. */
@@ -136,6 +135,7 @@ export type Mutation = {
    */
   likePost: Scalars['UnsignedInt'];
   signUp?: Maybe<User>;
+  signIn?: Maybe<Scalars['String']>;
 };
 
 
@@ -161,6 +161,12 @@ export type MutationLikePostArgs = {
 
 export type MutationSignUpArgs = {
   input: SignUpInput;
+};
+
+
+export type MutationSignInArgs = {
+  email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type AdditionalEntityFields = {

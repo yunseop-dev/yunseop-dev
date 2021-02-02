@@ -1,3 +1,4 @@
+import { AuthenticationError } from 'apollo-server-azure-functions';
 import {
   DateTimeResolver,
   EmailAddressResolver,
@@ -15,6 +16,20 @@ import {
   UserDbObject,
 } from './graphql-codegen-typings';
 import { mongoDbProvider } from './mongodb.provider';
+
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const getToken = ({ _id: id, email, socialType }: AccountDbObject) =>
+  jwt.sign(
+    {
+      id,
+      socialType,
+      email
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
 
 const mockCurrentUserId = '0123456789abcdef01234567';
 
@@ -42,6 +57,14 @@ export const resolvers = {
       return result.ops[0] as PostDbObject;
     },
     signUp: async (obj, { input }: { input: SignUpInput }): Promise<UserDbObject> => {
+      const accounts = await mongoDbProvider.accountsCollection.find({
+        email: input.email
+      }).toArray();
+
+      if (accounts.length > 0) {
+        throw new Error("Already email exists");
+      }
+
       const user = await mongoDbProvider.usersCollection.insertOne({
         firstName: input.firstName,
         lastName: input.lastName,
@@ -49,10 +72,11 @@ export const resolvers = {
       });
       const account = await mongoDbProvider.accountsCollection.insertOne({
         email: input.email,
-        password: input.password,
+        password: await bcrypt.hash(input.password, 10),
         socialType: input.socialType,
         user: user.insertedId
       });
+
       user.ops[0].accounts.push(account.insertedId);
 
       await mongoDbProvider.usersCollection.updateOne({
@@ -63,6 +87,19 @@ export const resolvers = {
         }
       });
       return user.ops[0];
+    },
+    signIn: async (obj, { email, password }: { email: string, password: string }): Promise<string> => {
+      const account = await mongoDbProvider.accountsCollection.findOne({
+        email
+      });
+      if (!account) {
+        throw new AuthenticationError("user not found");
+      }
+
+      const match = await bcrypt.compare(password, account.password);
+      if (!match) throw new AuthenticationError('wrong password!');
+
+      return getToken(account);
     }
   },
   Post: {

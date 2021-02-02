@@ -99,7 +99,6 @@ type Query {
   post(id: ID!): Post
   user(id: ID!): User
   account(id: ID!): Account
-  signIn(email: String!, password: String!): User
 }
 
 """
@@ -165,6 +164,7 @@ type Mutation {
   ): UnsignedInt!
 
   signUp(input: SignUpInput!): User
+  signIn(email: String!, password: String!): String
 }
 `;
 

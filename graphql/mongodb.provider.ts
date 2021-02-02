@@ -2,6 +2,7 @@ import { Collection, Db, MongoClient, ObjectID } from 'mongodb';
 
 import environment from './environment';
 import { AccountDbObject, PostDbObject, SocialType, UserDbObject } from './graphql-codegen-typings';
+import bcrypt from "bcryptjs";
 
 export class MongoDbProvider {
     private database?: Db;
@@ -111,18 +112,18 @@ export async function addMockUsersAsync (): Promise<void> {
                     _id: new ObjectID('0123456789abcdef01234567'),
                     email: 'test.user1@test.com',
                     socialType: SocialType.Email,
-                    password: "1234",
+                    password: await bcrypt.hash("1234", 10),
                     user: new ObjectID('4567890123abcdef45670123')
                 },
                 {
                     _id: new ObjectID('abc0123456789def01234567'),
                     email: 'test.user2@test.com',
                     socialType: SocialType.Email,
-                    password: "1234",
+                    password: await bcrypt.hash("1234", 10),
                     user: new ObjectID('fedcba987654321098765432')
                 },
             ]);
-            console.log("🐛  mock users added.");
+            console.log("🐛  mock users added."); 
         }
     } catch (error) {
         console.log("🐛", error.message);
