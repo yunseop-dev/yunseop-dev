@@ -123,45 +123,18 @@ export const resolvers: IResolvers | Array<IResolvers> = {
     }
   },
   Post: {
-    id: (obj: Post | PostDbObject): string =>
-      (obj as PostDbObject)._id
-        ? (obj as PostDbObject)._id.toString()
-        : (obj as Post).id,
-    author: async (obj: Post | PostDbObject): Promise<User | UserDbObject> => {
-      if (obj.author instanceof ObjectID) {
-        const user = await (mongoDbProvider.usersCollection.findOne({
-          _id: obj.author,
-        }) as Promise<UserDbObject>)
-        return user;
-      }
-      return obj.author;
-    },
-    publishedAt: (obj) => {
-      return new Date(obj.publishedAt).getTime();
-    }
+    id: (obj: PostDbObject): ObjectID => obj._id,
+    author: async (obj: PostDbObject): Promise<User | UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: obj.author }),
+    publishedAt: (obj) => new Date(obj.publishedAt).getTime(),
+    likedBy: async (obj: PostDbObject) => mongoDbProvider.usersCollection.find({ _id: { $in: (obj?.likedBy as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
   },
   User: {
-    id: (obj: User | UserDbObject): string =>
-      (obj as UserDbObject)._id
-        ? (obj as UserDbObject)._id.toString()
-        : (obj as User).id,
-    posts: (obj: User | UserDbObject): Promise<Post | PostDbObject[]> =>
-      mongoDbProvider.postsCollection
-        .find({
-          author: (obj as User).id
-            ? new ObjectID((obj as User).id)
-            : (obj as UserDbObject)._id,
-        })
-        .toArray(),
-    accounts: (obj: User | UserDbObject): Promise<AccountDbObject[]> => mongoDbProvider.accountsCollection.find({
-      user: (obj as User).id
-        ? new ObjectID((obj as User).id)
-        : (obj as UserDbObject)._id,
-    }).toArray(),
+    id: (obj: ObjectID | UserDbObject) => obj instanceof ObjectID ? obj : obj._id,
+    posts: (obj: UserDbObject): Promise<PostDbObject[]> => mongoDbProvider.postsCollection.find({ author: obj._id }).toArray(),
+    accounts: (obj: UserDbObject): Promise<AccountDbObject[]> => mongoDbProvider.accountsCollection.find({ user: obj._id }).toArray(),
   },
   Account: {
-    id: (obj: ObjectID | AccountDbObject): string => {
-      return obj instanceof ObjectID ? obj.toString() : (obj as AccountDbObject)._id.toString();
-    }
+    id: (obj: ObjectID | AccountDbObject): string => obj instanceof ObjectID ? obj.toString() : (obj as AccountDbObject)._id.toString(),
+    user: (obj: AccountDbObject) => mongoDbProvider.usersCollection.findOne({ _id: obj.user })
   }
 };
