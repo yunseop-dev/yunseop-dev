@@ -6,6 +6,7 @@ import {
   DateTimeMock,
   EmailAddressMock,
   UnsignedIntMock,
+  typeDefs as scalarTypeDefs,
 } from 'graphql-scalars';
 import { resolvers } from "./resolvers";
 
@@ -20,6 +21,12 @@ mongoDbProvider.connectAsync(environment.mongoDb.databaseName).then(() => {
 
 const server = new ApolloServer({
   resolvers,
+  context ({ request }) {
+    const authorization = request.headers.authorization || '';
+    return {
+      authorization
+    }
+  },
   typeDefs: [DIRECTIVES, typeDefs],
   introspection: environment.apollo.introspection,
   mocks: {

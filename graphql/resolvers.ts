@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server-azure-functions';
+import { AuthenticationError, IResolvers } from 'apollo-server-azure-functions';
 import {
   DateTimeResolver,
   EmailAddressResolver,
@@ -20,20 +20,35 @@ import { mongoDbProvider } from './mongodb.provider';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const getToken = ({ _id: id, email, socialType }: AccountDbObject) =>
+const getToken = ({ _id: id, email, socialType, user }: AccountDbObject) =>
   jwt.sign(
     {
       id,
       socialType,
-      email
+      email,
+      user
     },
     process.env.JWT_SECRET,
     { expiresIn: '30d' }
   );
 
-const mockCurrentUserId = '0123456789abcdef01234567';
+const getAccount = (auth: string): Promise<AccountDbObject> => {
+  if (!auth) throw new AuthenticationError('you must be logged in!');
 
-export const resolvers = {
+  const token = auth.split('Bearer ')[1];
+  if (!token) throw new AuthenticationError('you should provide a token!');
+
+  const account = new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) reject(new AuthenticationError('invalid token!'));
+      else resolve(decoded);
+    });
+  });
+
+  return account as Promise<AccountDbObject>;
+};
+
+export const resolvers: IResolvers | Array<IResolvers> = {
   DateTime: DateTimeResolver,
   EmailAddress: EmailAddressResolver,
   UnsignedInt: UnsignedIntResolver,
@@ -45,18 +60,22 @@ export const resolvers = {
   Mutation: {
     publishPost: async (
       obj: any,
-      { input }: { input: PublishPostInput }
+      { input }: { input: PublishPostInput },
+      context: { authorization: string }
     ): Promise<PostDbObject> => {
+      const account = await getAccount(context.authorization);
+      if (!account) throw new AuthenticationError("login required!");
+
       const result = await mongoDbProvider.postsCollection.insertOne({
         title: input.title,
         content: input.content,
         publishedAt: new Date(),
-        author: new ObjectID(mockCurrentUserId),
+        author: new ObjectID(account.user)
       });
 
       return result.ops[0] as PostDbObject;
     },
-    signUp: async (obj, { input }: { input: SignUpInput }): Promise<UserDbObject> => {
+    signUp: async (obj, { input }: { input: SignUpInput }, context): Promise<UserDbObject> => {
       const accounts = await mongoDbProvider.accountsCollection.find({
         email: input.email
       }).toArray();
@@ -92,6 +111,7 @@ export const resolvers = {
       const account = await mongoDbProvider.accountsCollection.findOne({
         email
       });
+
       if (!account) {
         throw new AuthenticationError("user not found");
       }
@@ -107,12 +127,15 @@ export const resolvers = {
       (obj as PostDbObject)._id
         ? (obj as PostDbObject)._id.toString()
         : (obj as Post).id,
-    author: async (obj: Post | PostDbObject): Promise<User | UserDbObject> =>
-      obj.author instanceof ObjectID
-        ? (mongoDbProvider.usersCollection.findOne({
+    author: async (obj: Post | PostDbObject): Promise<User | UserDbObject> => {
+      if (obj.author instanceof ObjectID) {
+        const user = await (mongoDbProvider.usersCollection.findOne({
           _id: obj.author,
         }) as Promise<UserDbObject>)
-        : obj.author,
+        return user;
+      }
+      return obj.author;
+    }
   },
   User: {
     id: (obj: User | UserDbObject): string =>
