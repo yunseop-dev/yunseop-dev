@@ -76,10 +76,25 @@ export type Post = {
   likedBy?: Maybe<Array<Maybe<User>>>;
 };
 
+export enum OrderField {
+  PublishedAt = 'publishedAt'
+}
+
+export enum OrderDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
+export type PostOrder = {
+  field?: Maybe<OrderField>;
+  direction?: Maybe<OrderDirection>;
+};
+
 export type Query = {
   __typename?: 'Query';
   /** Get post by ID. */
   post?: Maybe<Post>;
+  posts?: Maybe<Array<Maybe<Post>>>;
   user?: Maybe<User>;
   account?: Maybe<Account>;
 };
@@ -87,6 +102,14 @@ export type Query = {
 
 export type QueryPostArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryPostsArgs = {
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<PostOrder>;
+  publishedSince?: Maybe<Scalars['DateTime']>;
 };
 
 

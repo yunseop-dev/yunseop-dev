@@ -92,11 +92,31 @@ type Post @entity {
   likedBy: [User] @link
 }
 
+
+enum OrderField {
+  publishedAt
+}
+enum OrderDirection {
+  ASC,
+  DESC
+}
+
+input PostOrder {
+  field: OrderField,
+  direction: OrderDirection
+}
+
 type Query {
   """
   Get post by ID.
   """
   post(id: ID!): Post
+  posts(
+    first: Int,
+    last: Int,
+    orderBy: PostOrder,
+    publishedSince: DateTime
+  ): [Post]
   user(id: ID!): User
   account(id: ID!): Account
 }

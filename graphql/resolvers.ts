@@ -8,9 +8,11 @@ import { ObjectID } from 'mongodb';
 
 import {
   AccountDbObject,
+  OrderDirection,
   Post,
   PostDbObject,
   PublishPostInput,
+  QueryPostsArgs,
   SignUpInput,
   User,
   UserDbObject,
@@ -53,9 +55,14 @@ export const resolvers: IResolvers | Array<IResolvers> = {
   EmailAddress: EmailAddressResolver,
   UnsignedInt: UnsignedIntResolver,
   Query: {
-    user: (obj: any, { id }: { id: string }): Promise<UserDbObject | null> => mongoDbProvider.usersCollection.findOne({ _id: new ObjectID(id) }),
-    post: (obj: any, { id }: { id: string }): Promise<PostDbObject | null> => mongoDbProvider.postsCollection.findOne({ _id: new ObjectID(id) }),
-    account: (obj: any, { id }: { id: string }): Promise<AccountDbObject | null> => mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(id) }),
+    user: (obj: any, { id }: { id: string }): Promise<UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: new ObjectID(id) }),
+    post: (obj: any, { id }: { id: string }): Promise<PostDbObject> => mongoDbProvider.postsCollection.findOne({ _id: new ObjectID(id) }),
+    posts: (obj: any, args: QueryPostsArgs): Promise<Array<PostDbObject>> => {
+      return mongoDbProvider.postsCollection.find().sort({
+        [args.orderBy.field]: args.orderBy.direction === OrderDirection.Desc ? 1 : -1
+      }).toArray()
+    },
+    account: (obj: any, { id }: { id: string }): Promise<AccountDbObject> => mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(id) }),
   },
   Mutation: {
     publishPost: async (
@@ -124,9 +131,9 @@ export const resolvers: IResolvers | Array<IResolvers> = {
   },
   Post: {
     id: (obj: PostDbObject): ObjectID => obj._id,
-    author: async (obj: PostDbObject): Promise<User | UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: obj.author }),
+    author: (obj: PostDbObject): Promise<User | UserDbObject> => { console.log("🐛🌼", obj.author); return mongoDbProvider.usersCollection.findOne({ _id: obj.author }) },
     publishedAt: (obj) => new Date(obj.publishedAt).getTime(),
-    likedBy: async (obj: PostDbObject) => mongoDbProvider.usersCollection.find({ _id: { $in: (obj?.likedBy as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
+    likedBy: (obj: PostDbObject) => mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
   },
   User: {
     id: (obj: ObjectID | UserDbObject) => obj instanceof ObjectID ? obj : obj._id,
