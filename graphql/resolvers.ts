@@ -135,6 +135,9 @@ export const resolvers: IResolvers | Array<IResolvers> = {
         return user;
       }
       return obj.author;
+    },
+    publishedAt: (obj) => {
+      return new Date(obj.publishedAt).getTime();
     }
   },
   User: {
