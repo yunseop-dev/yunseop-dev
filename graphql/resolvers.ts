@@ -146,7 +146,7 @@ export const resolvers: IResolvers | Array<IResolvers> = {
   },
   Post: {
     id: (obj: PostDbObject): ObjectID => obj._id,
-    author: (obj: PostDbObject): Promise<User | UserDbObject> => { console.log("🐛🌼", obj.author); return mongoDbProvider.usersCollection.findOne({ _id: obj.author }) },
+    author: (obj: PostDbObject): Promise<User | UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: obj.author }),
     publishedAt: (obj) => new Date(obj.publishedAt).getTime(),
     likedBy: (obj: PostDbObject) => mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
   },
