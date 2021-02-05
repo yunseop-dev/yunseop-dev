@@ -110,6 +110,7 @@ export type QueryPostsArgs = {
   last?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<PostOrder>;
   publishedSince?: Maybe<Scalars['DateTime']>;
+  q?: Maybe<Scalars['String']>;
 };
 
 

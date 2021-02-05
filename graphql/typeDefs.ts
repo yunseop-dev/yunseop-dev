@@ -115,7 +115,8 @@ type Query {
     first: Int,
     last: Int,
     orderBy: PostOrder,
-    publishedSince: DateTime
+    publishedSince: DateTime,
+    q: String
   ): [Post]
   user(id: ID!): User
   account(id: ID!): Account

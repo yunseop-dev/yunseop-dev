@@ -4,7 +4,7 @@ import {
   EmailAddressResolver,
   UnsignedIntResolver,
 } from 'graphql-scalars';
-import { ObjectID } from 'mongodb';
+import { FilterQuery, ObjectID } from 'mongodb';
 
 import {
   AccountDbObject,
@@ -58,7 +58,22 @@ export const resolvers: IResolvers | Array<IResolvers> = {
     user: (obj: any, { id }: { id: string }): Promise<UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: new ObjectID(id) }),
     post: (obj: any, { id }: { id: string }): Promise<PostDbObject> => mongoDbProvider.postsCollection.findOne({ _id: new ObjectID(id) }),
     posts: (obj: any, args: QueryPostsArgs): Promise<Array<PostDbObject>> => {
-      return mongoDbProvider.postsCollection.find().sort({
+      const query: FilterQuery<PostDbObject> = {};
+      if (args.q) {
+        query.$or = [
+          {
+            title: {
+              $regex: args.q || ""
+            }
+          },
+          {
+            content: {
+              $regex: args.q || ""
+            }
+          }
+        ]
+      }
+      return mongoDbProvider.postsCollection.find(query).sort({
         [args.orderBy.field]: args.orderBy.direction === OrderDirection.Desc ? 1 : -1
       }).toArray()
     },

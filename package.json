@@ -16,6 +16,7 @@
   "dependencies": {
     "@graphql-codegen/typescript": "^1.20.2",
     "@graphql-codegen/typescript-mongodb": "^1.18.0",
+    "@graphql-tools/schema": "^7.1.2",
     "@test-graphql-cli/codegen": "^4.0.1-beta.2",
     "apollo-server-azure-functions": "^2.19.2",
     "bcryptjs": "^2.4.3",
