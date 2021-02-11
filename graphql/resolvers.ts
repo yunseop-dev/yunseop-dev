@@ -22,10 +22,10 @@ import { mongoDbProvider } from './mongodb.provider';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const getToken = ({ _id: id, email, socialType, user }: AccountDbObject) =>
+const getToken = ({ _id, email, socialType, user }: AccountDbObject) =>
   jwt.sign(
     {
-      id,
+      _id,
       socialType,
       email,
       user
@@ -78,6 +78,11 @@ export const resolvers: IResolvers | Array<IResolvers> = {
       }).toArray()
     },
     account: (obj: any, { id }: { id: string }): Promise<AccountDbObject> => mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(id) }),
+    my: async (obj: any, _: any, context: any) => {
+      const account = await getAccount(context.authorization);
+      if (!account) throw new AuthenticationError("login required!");
+      return mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(account._id) });
+    }
   },
   Mutation: {
     publishPost: async (
@@ -156,7 +161,10 @@ export const resolvers: IResolvers | Array<IResolvers> = {
     accounts: (obj: UserDbObject): Promise<AccountDbObject[]> => mongoDbProvider.accountsCollection.find({ user: obj._id }).toArray(),
   },
   Account: {
-    id: (obj: ObjectID | AccountDbObject): string => obj instanceof ObjectID ? obj.toString() : (obj as AccountDbObject)._id.toString(),
-    user: (obj: AccountDbObject) => mongoDbProvider.usersCollection.findOne({ _id: obj.user })
+    id: (obj: ObjectID | AccountDbObject): string => {
+      console.log(obj);
+      return obj instanceof ObjectID ? obj.toString() : (obj as AccountDbObject)._id.toString();
+    },
+    user: (obj: AccountDbObject) => mongoDbProvider.usersCollection.findOne({ _id: obj.user }),
   }
 };

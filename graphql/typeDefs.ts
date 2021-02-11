@@ -119,6 +119,7 @@ type Query {
     q: String
   ): [Post]
   user(id: ID!): User
+  my: Account
   account(id: ID!): Account
 }
 
