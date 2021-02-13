@@ -96,6 +96,7 @@ export type Query = {
   post?: Maybe<Post>;
   posts?: Maybe<Array<Maybe<Post>>>;
   user?: Maybe<User>;
+  my?: Maybe<Account>;
   account?: Maybe<Account>;
 };
 
