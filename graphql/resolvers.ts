@@ -73,8 +73,8 @@ export const resolvers: IResolvers | Array<IResolvers> = {
           }
         ]
       }
-      return mongoDbProvider.postsCollection.find(query).sort({
-        [args.orderBy.field]: args.orderBy.direction === OrderDirection.Desc ? 1 : -1
+      return mongoDbProvider.postsCollection.find(query, { skip: args.offset, limit: args.limit }).sort({
+        [args.orderBy?.field]: args.orderBy?.direction === OrderDirection.Desc ? 1 : -1
       }).toArray()
     },
     account: (obj: any, { id }: { id: string }): Promise<AccountDbObject> => mongoDbProvider.accountsCollection.findOne({ _id: new ObjectID(id) }),

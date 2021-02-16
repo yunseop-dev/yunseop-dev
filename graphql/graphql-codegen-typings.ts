@@ -107,8 +107,8 @@ export type QueryPostArgs = {
 
 
 export type QueryPostsArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
   orderBy?: Maybe<PostOrder>;
   publishedSince?: Maybe<Scalars['DateTime']>;
   q?: Maybe<Scalars['String']>;

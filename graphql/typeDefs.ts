@@ -112,8 +112,8 @@ type Query {
   """
   post(id: ID!): Post
   posts(
-    first: Int,
-    last: Int,
+    offset: Int,
+    limit: Int,
     orderBy: PostOrder,
     publishedSince: DateTime,
     q: String
