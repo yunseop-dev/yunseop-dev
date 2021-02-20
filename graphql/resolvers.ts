@@ -147,6 +147,24 @@ export const resolvers: IResolvers | Array<IResolvers> = {
       if (!match) throw new AuthenticationError('wrong password!');
 
       return getToken(account);
+    },
+    likePost: async (obj, { postId }: { postId: ObjectID }, context) => {
+      const account = await getAccount(context.authorization);
+      if (!account) throw new AuthenticationError("login required!");
+      const userId = new ObjectID(account.user);
+      postId = typeof postId === "string" ? new ObjectID(postId) : postId;
+      const post = await mongoDbProvider.postsCollection.findOne({
+        _id: postId,
+        likedBy: userId
+      });
+      const result = await mongoDbProvider.postsCollection.updateOne({
+        _id: postId
+      }, {
+        [post ? '$pull' : '$addToSet']: {
+          likedBy: new ObjectID(account.user)
+        }
+      })
+      return result.result.nModified > 0 && !post;
     }
   },
   Post: {

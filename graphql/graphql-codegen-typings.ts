@@ -158,7 +158,7 @@ export type Mutation = {
    * Like post.
    * Returns the updated number of likes received.
    */
-  likePost: Scalars['UnsignedInt'];
+  likePost: Scalars['Boolean'];
   signUp?: Maybe<User>;
   signIn?: Maybe<Scalars['String']>;
 };

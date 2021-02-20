@@ -183,7 +183,7 @@ type Mutation {
     Post's ID to like.
     """
     postId: ID!
-  ): UnsignedInt!
+  ): Boolean!
 
   signUp(input: SignUpInput!): User
   signIn(email: String!, password: String!): String
