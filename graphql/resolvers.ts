@@ -97,7 +97,8 @@ export const resolvers: IResolvers | Array<IResolvers> = {
         title: input.title,
         content: input.content,
         publishedAt: new Date(),
-        author: new ObjectID(account.user)
+        author: new ObjectID(account.user),
+        likedBy: []
       });
 
       return result.ops[0] as PostDbObject;

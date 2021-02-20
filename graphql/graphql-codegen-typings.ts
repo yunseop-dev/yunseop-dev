@@ -73,7 +73,7 @@ export type Post = {
   /** Post published timestamp. */
   publishedAt?: Maybe<Scalars['DateTime']>;
   /** Users who like this post. */
-  likedBy?: Maybe<Array<Maybe<User>>>;
+  likedBy: Array<Maybe<User>>;
 };
 
 export enum OrderField {
@@ -222,5 +222,5 @@ export type PostDbObject = {
   content: string,
   author: UserDbObject['_id'],
   publishedAt?: Date,
-  likedBy?: Maybe<Array<Maybe<UserDbObject['_id']>>>,
+  likedBy: Array<Maybe<UserDbObject['_id']>>,
 };

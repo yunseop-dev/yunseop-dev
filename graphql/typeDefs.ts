@@ -89,7 +89,7 @@ type Post @entity {
   """
   Users who like this post.
   """
-  likedBy: [User] @link
+  likedBy: [User]! @link
 }
 
 
