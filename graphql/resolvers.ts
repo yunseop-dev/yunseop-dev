@@ -174,11 +174,8 @@ export const resolvers: IResolvers | Array<IResolvers> = {
     id: (obj: PostDbObject): ObjectID => obj._id,
     author: (obj: PostDbObject): Promise<User | UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: obj.author }),
     publishedAt: (obj) => new Date(obj.publishedAt).getTime(),
-    // likedBy: (obj: PostDbObject) => {
-    //   // mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
-    //   console.log("Post > likedBy", obj?.likedBy);
-    //   return []
-    // }
+    likedBy: (obj) => mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray(),
+    likedByConnection: (obj) => obj.likedBy
   },
   LikedByConnection: {
     edges: async (likedBy: Array<UserDbObject['_id']>): Promise<Array<UserEdge>> => {

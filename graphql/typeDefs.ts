@@ -89,7 +89,9 @@ type Post @entity {
   """
   Users who like this post.
   """
-  likedBy(
+  likedBy: [User]! @link
+  
+  likedByConnection(
     after: String
     before: String
     first: Int

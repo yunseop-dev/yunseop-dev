@@ -73,11 +73,21 @@ export type Post = {
   /** Post published timestamp. */
   publishedAt?: Maybe<Scalars['DateTime']>;
   /** Users who like this post. */
-  likedBy?: Maybe<LikedByConnection>;
+  likedBy: Array<Maybe<User>>;
+  likedByConnection?: Maybe<LikedByConnection>;
 };
 
 
 export type PostLikedByArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<LikeByOrder>;
+};
+
+
+export type PostLikedByConnectionArgs = {
   after?: Maybe<Scalars['String']>;
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['Int']>;
@@ -262,4 +272,5 @@ export type PostDbObject = {
   content: string,
   author: UserDbObject['_id'],
   publishedAt?: Date,
+  likedBy: Array<Maybe<UserDbObject['_id']>>,
 };
