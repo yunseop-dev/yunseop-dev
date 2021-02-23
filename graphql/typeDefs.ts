@@ -89,9 +89,42 @@ type Post @entity {
   """
   Users who like this post.
   """
-  likedBy: [User]! @link
+  likedBy(
+    after: String
+    before: String
+    first: Int
+    last: Int
+    orderBy: LikeByOrder = {field: CREATED_AT, direction: ASC}
+  ): LikedByConnection
 }
 
+input LikeByOrder {
+  field: LikeByOrderField!
+  direction: OrderDirection!
+}
+
+enum LikeByOrderField {
+  CREATED_AT
+}
+
+type LikedByConnection {
+  edges: [UserEdge],
+  nodes: [User] @link,
+  pageInfo: PageInfo!,
+  totalCount: UnsignedInt!
+}
+
+type UserEdge {
+  node: User,
+  cursor: String!
+}
+
+type PageInfo {
+  endCursor: String,
+  hasNextPage: Boolean!,
+  hasPreviousPage: Boolean!,
+  startCursor: String
+}
 
 enum OrderField {
   publishedAt

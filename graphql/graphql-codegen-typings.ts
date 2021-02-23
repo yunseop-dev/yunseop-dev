@@ -73,7 +73,47 @@ export type Post = {
   /** Post published timestamp. */
   publishedAt?: Maybe<Scalars['DateTime']>;
   /** Users who like this post. */
-  likedBy: Array<Maybe<User>>;
+  likedBy?: Maybe<LikedByConnection>;
+};
+
+
+export type PostLikedByArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<LikeByOrder>;
+};
+
+export type LikeByOrder = {
+  field: LikeByOrderField;
+  direction: OrderDirection;
+};
+
+export enum LikeByOrderField {
+  CreatedAt = 'CREATED_AT'
+}
+
+export type LikedByConnection = {
+  __typename?: 'LikedByConnection';
+  edges?: Maybe<Array<Maybe<UserEdge>>>;
+  nodes?: Maybe<Array<Maybe<User>>>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['UnsignedInt'];
+};
+
+export type UserEdge = {
+  __typename?: 'UserEdge';
+  node?: Maybe<User>;
+  cursor: Scalars['String'];
+};
+
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['String']>;
+  hasNextPage: Scalars['Boolean'];
+  hasPreviousPage: Scalars['Boolean'];
+  startCursor?: Maybe<Scalars['String']>;
 };
 
 export enum OrderField {
@@ -222,5 +262,4 @@ export type PostDbObject = {
   content: string,
   author: UserDbObject['_id'],
   publishedAt?: Date,
-  likedBy: Array<Maybe<UserDbObject['_id']>>,
 };

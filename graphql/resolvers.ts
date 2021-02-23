@@ -9,6 +9,7 @@ import { FilterQuery, ObjectID } from 'mongodb';
 import {
   AccountDbObject,
   OrderDirection,
+  PageInfo,
   Post,
   PostDbObject,
   PublishPostInput,
@@ -16,6 +17,7 @@ import {
   SignUpInput,
   User,
   UserDbObject,
+  UserEdge,
 } from './graphql-codegen-typings';
 import { mongoDbProvider } from './mongodb.provider';
 
@@ -172,7 +174,38 @@ export const resolvers: IResolvers | Array<IResolvers> = {
     id: (obj: PostDbObject): ObjectID => obj._id,
     author: (obj: PostDbObject): Promise<User | UserDbObject> => mongoDbProvider.usersCollection.findOne({ _id: obj.author }),
     publishedAt: (obj) => new Date(obj.publishedAt).getTime(),
-    likedBy: (obj: PostDbObject) => mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
+    // likedBy: (obj: PostDbObject) => {
+    //   // mongoDbProvider.usersCollection.find({ _id: { $in: ((obj?.likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
+    //   console.log("Post > likedBy", obj?.likedBy);
+    //   return []
+    // }
+  },
+  LikedByConnection: {
+    edges: async (likedBy: Array<UserDbObject['_id']>): Promise<Array<UserEdge>> => {
+      console.log("LikedByConnection > edges", likedBy);
+      const users = await mongoDbProvider.usersCollection.find({ _id: { $in: ((likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray();
+      return users.map((user) => ({
+        node: user as any,
+        cursor: user._id.toHexString()
+      }))
+    },
+    nodes: (likedBy: Array<UserDbObject['_id']>): Promise<Array<UserDbObject>> => {
+      console.log("LikedByConnection > nodes", likedBy);
+      return mongoDbProvider.usersCollection.find({ _id: { $in: ((likedBy || []) as Array<ObjectID>)?.map?.(item => new ObjectID(item)) } }).toArray()
+    },
+    pageInfo: (likedBy: Array<UserDbObject['_id']>): PageInfo => {
+      console.log("LikedByConnection > pageInfo", likedBy);
+      return {
+        hasNextPage: true,
+        hasPreviousPage: true,
+        endCursor: "foo",
+        startCursor: "bar"
+      };
+    },
+    totalCount: (likedBy: Array<UserDbObject['_id']>): number => {
+      console.log("LikedByConnection > totalCount", likedBy);
+      return likedBy?.length;
+    },
   },
   User: {
     id: (obj: ObjectID | UserDbObject) => obj instanceof ObjectID ? obj : obj._id,
