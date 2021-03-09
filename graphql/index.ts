@@ -1,33 +1,32 @@
 require('dotenv').config()
-import {
-  ApolloServer
-} from 'apollo-server-azure-functions';
-import {
-  DateTimeMock,
-  EmailAddressMock,
-  UnsignedIntMock,
-  typeDefs as scalarTypeDefs,
-} from 'graphql-scalars';
-import { resolvers } from "./resolvers";
+import { ApolloServer } from 'apollo-server-azure-functions';
+import mongoose from 'mongoose';
 
+import typeDefs from './typeDefs';
+import resolvers from './resolvers/index';
 import environment from './environment';
-import { addMockUsersAsync, mongoDbProvider } from './mongodb.provider';
-import typeDefs from "./typeDefs";
-import { DIRECTIVES } from '@graphql-codegen/typescript-mongodb';
+import { DateTimeMock, EmailAddressMock, UnsignedIntMock } from 'graphql-scalars';
 
-mongoDbProvider.connectAsync(environment.mongoDb.databaseName).then(() => {
-  addMockUsersAsync(); // TODO: Remove in Production.
-});
+mongoose
+  .connect(environment.mongoDb.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    auth: {
+      user: environment.mongoDb.user,
+      password: environment.mongoDb.password
+    }
+  })
+  .then(() => {
+    console.log('MongoDB Connected');
+  })
+  .catch(err => {
+    console.error(err)
+  })
 
 const server = new ApolloServer({
+  typeDefs,
   resolvers,
-  context ({ request }) {
-    const authorization = request.headers.authorization || '';
-    return {
-      authorization
-    }
-  },
-  typeDefs: [DIRECTIVES, typeDefs],
+  context: ({ request }) => ({ request }),
   introspection: environment.apollo.introspection,
   mocks: {
     DateTime: DateTimeMock,
