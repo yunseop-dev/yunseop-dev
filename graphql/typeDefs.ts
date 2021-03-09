@@ -3,13 +3,11 @@ import { gql } from 'apollo-server-azure-functions';
 export default gql`
   type Post {
     id: ID!
-    body: String!
-    createdAt: String!
-    username: String!
-    comments: [Comment]!
-    likes: [Like]!
-    likeCount: Int!
-    commentCount: Int!
+    title: String!
+    content: String!
+    author: User!
+    publishedAt: String
+    likedBy: [User]!
   }
   type Comment {
     id: ID!

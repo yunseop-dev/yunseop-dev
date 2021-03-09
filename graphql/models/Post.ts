@@ -18,9 +18,9 @@ export interface IPost extends Document {
 }
 
 const postSchema = new Schema({
-    body: String,
-    username: String,
-    createdAt: String,
+    content: String,
+    title: String,
+    publishedAt: String,
     comments: [
         {
             body: String,
@@ -28,13 +28,13 @@ const postSchema = new Schema({
             createdAt: String
         }
     ],
-    likes: [
+    likedBy: [
         {
-            username: String,
-            createdAt: String
+            type: Schema.Types.ObjectId,
+            ref: 'users'
         }
     ],
-    user: {
+    author: {
         type: Schema.Types.ObjectId,
         ref: 'users'
     }

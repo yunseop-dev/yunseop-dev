@@ -6,10 +6,8 @@ import checkAuth from '../util/check-auth';
 export default {
     Query: {
         async posts () {
-            console.log("🐛");
             try {
                 const posts = await Post.find().sort({ createdAt: -1 });
-                console.log("🐛", posts);
                 return posts;
             } catch (err) {
                 throw new Error(err);
@@ -18,7 +16,6 @@ export default {
         async post (_, { postId }) {
             try {
                 const post = await Post.findById(postId);
-                console.log("🐛", post);
                 if (post) {
                     return post;
                 } else {
