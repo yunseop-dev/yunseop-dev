@@ -1,17 +1,29 @@
 import { model, Schema, Document } from 'mongoose';
+import { IAccount } from './Account';
 
 export interface IUser extends Document {
-    username: string;
-    password: string;
-    email: string;
-    createdAt: string;
+    id: Schema.Types.ObjectId;
+    firstName: string;
+    lastName: string;
+    following: Array<IUser>;
+    accounts: Array<IAccount>;
 }
 
 const userSchema = new Schema({
-    username: String,
-    password: String,
-    email: String,
-    createdAt: String
+    firstName: String,
+    lastName: String,
+    following: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        }
+    ],
+    createdAt: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'accounts'
+        }
+    ]
 });
 
 export default model<IUser>('User', userSchema);

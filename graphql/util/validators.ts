@@ -33,7 +33,7 @@ export const validateRegisterInput = (
     };
 };
 
-export const validateLoginInput = (username, password) => {
+export const validateLoginInput = (email, password) => {
     const errors = {
         username: "",
         email: "",
@@ -41,8 +41,8 @@ export const validateLoginInput = (username, password) => {
         confirmPassword: "",
         general: ""
     };
-    if (username.trim() === '') {
-        errors.username = 'Username must not be empty';
+    if (email.trim() === '') {
+        errors.email = 'Email must not be empty';
     }
     if (password.trim() === '') {
         errors.password = 'Password must not be empty';

@@ -1,18 +1,18 @@
 import { AuthenticationError } from 'apollo-server-azure-functions';
 
 import jwt from 'jsonwebtoken';
-import { IUser } from '../models/User';
+import { IAccount } from '../models/Account';
 
 export default (context) => {
     // context = { ... headers }
-    const authHeader = context.req.headers.authorization;
+    const authHeader = context.request.headers.authorization;
     if (authHeader) {
         // Bearer ....
         const token = authHeader.split('Bearer ')[1];
         if (token) {
             try {
-                const user: IUser = jwt.verify(token, process.env.JWT_SECRET) as IUser;
-                return user;
+                const account: IAccount = jwt.verify(token, process.env.JWT_SECRET) as IAccount;
+                return account;
             } catch (err) {
                 throw new AuthenticationError('Invalid/Expired token');
             }

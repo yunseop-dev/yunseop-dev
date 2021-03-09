@@ -6,9 +6,9 @@ import Comment from '../models/Comment';
 
 export default {
     Mutation: {
-        createComment: async (_, { postId, body }, context) => {
-            const { username } = checkAuth(context);
-            if (body.trim() === '') {
+        createComment: async (_, { postId, content }, context) => {
+            const account = checkAuth(context);
+            if (content.trim() === '') {
                 throw new UserInputError('Empty comment', {
                     errors: {
                         body: 'Comment body must not empty'
@@ -19,25 +19,25 @@ export default {
             const post = await Post.findById(postId);
 
             if (post) {
-                const newComment = new Comment({
-                    body,
-                    username,
-                    createdAt: new Date().toISOString()
-                });
+                const newComment = new Comment();
+                newComment.content = content;
+                newComment.user = account.user;
+                newComment.createdAt = new Date().toISOString();
+                await newComment.save();
                 post.comments.unshift(newComment);
                 await post.save();
                 return post;
             } else throw new UserInputError('Post not found');
         },
         async deleteComment (_, { postId, commentId }, context) {
-            const { username } = checkAuth(context);
+            const account = checkAuth(context);
 
             const post = await Post.findById(postId);
 
             if (post) {
                 const commentIndex = post.comments.findIndex((c) => c.id === commentId);
 
-                if (post.comments[commentIndex].username === username) {
+                if (post.comments[commentIndex].user.id === account.user.id) {
                     post.comments.splice(commentIndex, 1);
                     await post.save();
                     return post;

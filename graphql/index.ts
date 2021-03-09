@@ -26,7 +26,11 @@ mongoose
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ request }) => ({ request }),
+  context ({ request }) {
+    return {
+      request
+    }
+  },
   introspection: environment.apollo.introspection,
   mocks: {
     DateTime: DateTimeMock,

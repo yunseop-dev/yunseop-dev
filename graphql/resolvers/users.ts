@@ -3,17 +3,17 @@ import jwt from 'jsonwebtoken';
 import { UserInputError } from 'apollo-server-azure-functions';
 
 import {
-    validateRegisterInput,
     validateLoginInput
 } from '../util/validators';
-import User from '../models/User';
+import Account, { IAccount } from '../models/Account';
 
-function generateToken (user) {
+function generateToken (account: IAccount) {
     return jwt.sign(
         {
-            id: user.id,
-            email: user.email,
-            username: user.username
+            id: account.id,
+            email: account.email,
+            socialType: account.socialType,
+            user: account.user
         },
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
@@ -22,78 +22,79 @@ function generateToken (user) {
 
 export default {
     Mutation: {
-        async login (_, { username, password }) {
-            const { errors, valid } = validateLoginInput(username, password);
-
+        async login (_, { email, password }) {
+            const { errors, valid } = validateLoginInput(email, password);
             if (!valid) {
                 throw new UserInputError('Errors', { errors });
             }
 
-            const user = await User.findOne({ username });
+            const account = await Account.findOne({
+                email
+            });
 
-            if (!user) {
-                errors.general = 'User not found';
-                throw new UserInputError('User not found', { errors });
+            if (!account) {
+                errors.general = 'Account not found';
+                throw new UserInputError('Account not found', { errors });
             }
 
-            const match = await bcrypt.compare(password, user.password);
+            const match = await bcrypt.compare(password, account.password);
             if (!match) {
                 errors.general = 'Wrong crendetials';
                 throw new UserInputError('Wrong crendetials', { errors });
             }
 
-            const token = generateToken(user);
+            const token = generateToken(account);
 
             return {
-                ...user,
-                id: user._id,
+                ...account,
+                id: account.id,
                 token
             };
         },
-        async register (
-            _,
-            {
-                registerInput: { username, email, password, confirmPassword }
-            }
-        ) {
-            // Validate user data
-            const { valid, errors } = validateRegisterInput(
-                username,
-                email,
-                password,
-                confirmPassword
-            );
-            if (!valid) {
-                throw new UserInputError('Errors', { errors });
-            }
-            // TODO: Make sure user doesnt already exist
-            const user = await User.findOne({ username });
-            if (user) {
-                throw new UserInputError('Username is taken', {
-                    errors: {
-                        username: 'This username is taken'
-                    }
-                });
-            }
-            // hash password and create an auth token
-            password = await bcrypt.hash(password, 12);
+        // async register (
+        //     _,
+        //     {
+        //         registerInput: { username, email, password, confirmPassword }
+        //     }
+        // ) {
+        //     // Validate user data
+        //     const { valid, errors } = validateRegisterInput(
+        //         username,
+        //         email,
+        //         password,
+        //         confirmPassword
+        //     );
+        //     if (!valid) {
+        //         throw new UserInputError('Errors', { errors });
+        //     }
+        //     // TODO: Make sure user doesnt already exist
+        //     const user = await User.findOne({ username });
+        //     if (user) {
+        //         throw new UserInputError('Username is taken', {
+        //             errors: {
+        //                 username: 'This username is taken'
+        //             }
+        //         });
+        //     }
+        //     // hash password and create an auth token
+        //     password = await bcrypt.hash(password, 12);
 
-            const newUser = new User({
-                email,
-                username,
-                password,
-                createdAt: new Date().toISOString()
-            });
+        //     const newUser = new User({
+        //         email,
+        //         username,
+        //         password,
+        //         createdAt: new Date().toISOString()
+        //     });
 
-            const res = await newUser.save();
+        //     const res = await newUser.save();
 
-            const token = generateToken(res);
+        //     const token = generateToken(res);
 
-            return {
-                ...res,
-                id: res._id,
-                token
-            };
-        }
+        //     return {
+        //         ...res,
+        //         id: res._id,
+        //         token
+        //     };
+        // }
     }
 };

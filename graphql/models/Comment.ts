@@ -1,14 +1,18 @@
 import { model, Schema, Document } from 'mongoose';
+import { IUser } from './User';
 export interface IComment extends Document {
     id: Schema.Types.ObjectId;
-    body: string;
-    username: string;
+    content: string;
+    user: IUser;
     createdAt: string;
 }
 
 const commentSchema = new Schema({
-    body: String,
-    username: String,
+    content: String,
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'users'
+    },
     createdAt: String
 });
 

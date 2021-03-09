@@ -1,6 +1,14 @@
 import { gql } from 'apollo-server-azure-functions';
 
 export default gql`
+  enum SocialType {
+    GITHUB
+    FACEBOOK
+    TWITTER
+    GOOGLE
+    EMAIL
+  }
+
   type Post {
     id: ID!
     title: String!
@@ -20,12 +28,19 @@ export default gql`
     createdAt: String!
     username: String!
   }
+  type Account {
+    id: ID!
+    email: String
+    socialType: SocialType!
+    user: User!
+    password: String
+  }
   type User {
     id: ID!
-    email: String!
-    token: String!
-    username: String!
-    createdAt: String!
+    firstName: String!
+    lastName: String!
+    following: [User]
+    accounts: [Account]
   }
   input RegisterInput {
     username: String!
@@ -38,11 +53,11 @@ export default gql`
     post(postId: ID!): Post
   }
   type Mutation {
-    register(registerInput: RegisterInput): User!
+    # register(registerInput: RegisterInput): User!
     login(username: String!, password: String!): User!
-    createPost(body: String!): Post!
+    createPost(content: String!, title: String!): Post!
     deletePost(postId: ID!): String!
-    createComment(postId: String!, body: String!): Post!
+    createComment(postId: String!, content: String!): Post!
     deleteComment(postId: ID!, commentId: ID!): Post!
     likePost(postId: ID!): Post!
   }
