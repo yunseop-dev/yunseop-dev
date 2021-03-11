@@ -55,6 +55,7 @@ export default gql`
   type Query {
     posts: [Post]
     post(postId: ID!): Post
+    my: Account
   }
   type Mutation {
     # register(registerInput: RegisterInput): User!

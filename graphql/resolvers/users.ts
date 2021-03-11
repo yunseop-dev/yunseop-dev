@@ -6,6 +6,7 @@ import {
     validateLoginInput
 } from '../util/validators';
 import Account, { IAccount } from '../models/Account';
+import checkAuth from '../util/check-auth';
 
 function generateToken (account: IAccount) {
     return jwt.sign(
@@ -21,6 +22,12 @@ function generateToken (account: IAccount) {
 }
 
 export default {
+    Query: {
+        my (_, _params, context) {
+            const account = checkAuth(context);
+            return account;
+        }
+    },
     Mutation: {
         async login (_, { email, password }) {
             const { errors, valid } = validateLoginInput(email, password);

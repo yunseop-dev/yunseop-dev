@@ -28,6 +28,7 @@ export default {
         user: (parent: IAccount) => User.findById(parent.user)
     },
     Query: {
+        ...usersResolvers.Query,
         ...postsResolvers.Query
     },
     Mutation: {
