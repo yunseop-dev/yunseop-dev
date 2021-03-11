@@ -6,6 +6,7 @@ import {
     validateLoginInput
 } from '../util/validators';
 import Account, { IAccount } from '../models/Account';
+import User from '../models/User';
 
 function generateToken (account: IAccount) {
     return jwt.sign(
@@ -44,10 +45,9 @@ export default {
             }
 
             const token = generateToken(account);
-
+            const user = await User.findById(account.user);
             return {
-                ...account,
-                id: account.id,
+                user,
                 token
             };
         },
