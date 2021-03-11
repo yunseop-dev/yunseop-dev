@@ -7,8 +7,8 @@ export interface IPost extends Document {
     title: string,
     publishedAt: string,
     comments: Array<IComment>,
-    likedBy: Array<IUser>,
-    author: IUser
+    likedBy: Array<IUser['id']>,
+    author: IUser['id']
 }
 
 const postSchema = new Schema({

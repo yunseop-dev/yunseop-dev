@@ -13,7 +13,7 @@ export interface IAccount extends Document {
     email: string;
     socialType: SocialType;
     password: string;
-    user: IUser
+    user: IUser['id'];
 }
 
 const accountSchema = new Schema({

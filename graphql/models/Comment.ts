@@ -3,7 +3,7 @@ import { IUser } from './User';
 export interface IComment extends Document {
     id: Schema.Types.ObjectId;
     content: string;
-    user: IUser;
+    user: IUser['id'];
     createdAt: string;
 }
 

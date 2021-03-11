@@ -5,8 +5,8 @@ export interface IUser extends Document {
     id: Schema.Types.ObjectId;
     firstName: string;
     lastName: string;
-    following: Array<IUser>;
-    accounts: Array<IAccount>;
+    following: Array<IUser['id']>;
+    accounts: Array<IAccount['id']>;
 }
 
 const userSchema = new Schema({
