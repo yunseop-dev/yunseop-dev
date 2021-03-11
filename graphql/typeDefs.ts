@@ -35,8 +35,8 @@ export default gql`
     user: User!
     password: String
   }
-  type UserWithToken {
-    user: User!
+  type AccountWithToken {
+    account: Account!
     token: String!
   }
   type User {
@@ -58,7 +58,7 @@ export default gql`
   }
   type Mutation {
     # register(registerInput: RegisterInput): User!
-    login(email: String!, password: String!): UserWithToken!
+    login(email: String!, password: String!): AccountWithToken!
     createPost(content: String!, title: String!): Post!
     deletePost(postId: ID!): String!
     createComment(postId: String!, content: String!): Post!
