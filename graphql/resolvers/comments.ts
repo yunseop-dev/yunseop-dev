@@ -37,7 +37,7 @@ export default {
             if (post) {
                 const commentIndex = post.comments.findIndex((c) => c.id === commentId);
 
-                if (post.comments[commentIndex].user.id === account.user.id) {
+                if (post.comments[commentIndex].user === account.user) {
                     post.comments.splice(commentIndex, 1);
                     await post.save();
                     return post;

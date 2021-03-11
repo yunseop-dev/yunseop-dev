@@ -49,7 +49,7 @@ export default {
 
             try {
                 const post = await Post.findById(postId);
-                if (account.user.id === post.author.id) {
+                if (account.user === post.author) {
                     await post.delete();
                     return 'Post deleted successfully';
                 } else {
@@ -61,19 +61,18 @@ export default {
         },
         async likePost (_, { postId }, context) {
             const account = checkAuth(context);
+            const userId = account.user;
 
             const post = await Post.findById(postId);
             if (post) {
-                if (post.likedBy.find((like) => like.id === account.user.id)) {
+                if (post.likedBy.find((like) => like.toString() == userId.toString())) {
                     // Post already likes, unlike it
-                    post.likedBy = post.likedBy.filter((item) => item.id !== account.user.id);
+                    post.likedBy = post.likedBy.filter((like) => like.toString() != userId.toString());
                 } else {
                     // Not liked, like post
-                    post.likedBy.push(account.user);
+                    post.likedBy.push(userId);
                 }
-
-                await post.save();
-                return post;
+                return post.save();
             } else throw new UserInputError('Post not found');
         }
     }
