@@ -17,7 +17,7 @@ function generateToken (account: IAccount) {
             user: account.user
         },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '30 days' }
     );
 }
 
