@@ -19,12 +19,12 @@ export default {
             const post = await Post.findById(postId);
 
             if (post) {
-                const newComment = new Comment();
-                newComment.content = content;
-                newComment.user = account.user;
-                newComment.createdAt = new Date().toISOString();
-                await newComment.save();
-                post.comments.unshift(newComment);
+                const newComment = await new Comment({
+                    content: content,
+                    user: account.user,
+                    createdAt: new Date().toISOString()
+                }).save();
+                post.comments.unshift(newComment.id);
                 await post.save();
                 return post;
             } else throw new UserInputError('Post not found');
@@ -35,9 +35,9 @@ export default {
             const post = await Post.findById(postId);
 
             if (post) {
-                const commentIndex = post.comments.findIndex((c) => c.id === commentId);
+                const commentIndex = post.comments.findIndex((comment) => comment === commentId);
 
-                if (post.comments[commentIndex].user === account.user) {
+                if (post.comments[commentIndex] === account.user) {
                     post.comments.splice(commentIndex, 1);
                     await post.save();
                     return post;

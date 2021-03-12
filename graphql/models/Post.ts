@@ -6,7 +6,7 @@ export interface IPost extends Document {
     content: string,
     title: string,
     publishedAt: string,
-    comments: Array<IComment>,
+    comments: Array<IComment['id']>,
     likedBy: Array<IUser['id']>,
     author: IUser['id']
 }

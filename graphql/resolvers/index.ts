@@ -4,6 +4,7 @@ import commentsResolvers from './comments';
 import { IPost } from '../models/Post';
 import User, { IUser } from '../models/User';
 import Account, { IAccount } from '../models/Account';
+import Comment, { IComment } from '../models/Comment';
 
 export default {
     Post: {
@@ -13,6 +14,15 @@ export default {
             }
         }),
         author: (parent: IPost) => User.findById(parent.author),
+        comments: (parent: IPost) => {
+            return Comment.find(
+                {
+                    '_id': {
+                        $in: parent.comments
+                    }
+                }
+            )
+        }
     },
     User: {
         id: (parent: IUser) => parent._id,
@@ -25,6 +35,10 @@ export default {
     },
     Account: {
         id: (parent: IAccount) => parent._id,
+        user: (parent: IAccount) => User.findById(parent.user)
+    },
+    Comment: {
+        id: (parent: IComment) => parent._id,
         user: (parent: IAccount) => User.findById(parent.user)
     },
     Query: {

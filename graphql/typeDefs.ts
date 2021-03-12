@@ -16,12 +16,13 @@ export default gql`
     author: User!
     publishedAt: String
     likedBy: [User]!
+    comments: [Comment]
   }
   type Comment {
     id: ID!
     createdAt: String!
-    username: String!
-    body: String!
+    user: User!
+    content: String!
   }
   type Like {
     id: ID!
