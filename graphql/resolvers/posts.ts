@@ -72,7 +72,8 @@ export default {
                     // Not liked, like post
                     post.likedBy.push(userId);
                 }
-                return post.save();
+                await post.save();
+                return post;
             } else throw new UserInputError('Post not found');
         }
     }

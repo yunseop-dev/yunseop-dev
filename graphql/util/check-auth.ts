@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken';
 import { IAccount } from '../models/Account';
 
 export default (context) => {
-    // context = { ... headers }
     const authHeader = context.request.headers.authorization;
     if (authHeader) {
         // Bearer ....
